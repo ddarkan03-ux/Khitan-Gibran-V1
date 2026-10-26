@@ -1,0 +1,44 @@
+rules_version = '2';
+// Tempel di Firebase Console > Firestore Database > Rules, lalu Publish.
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // Admin = akun dengan email "<kode>@admin.undangan" (dibuat di Authentication)
+    function admin(kode) {
+      return request.auth != null && request.auth.token.email == kode + '@admin.undangan';
+    }
+    function publik(kode) {
+      let p = /databases/$(db)/documents/undangan/$(kode)/pengaturan/utama;
+      return !exists(p) || get(p).data.get('ucapanPublik', true) == true;
+    }
+
+    match /undangan/{kode} {
+
+      // Ucapan tamu: siapa pun boleh menulis; dibaca semua tamu bila "ucapanPublik" menyala
+      match /ucapan/{id} {
+        allow read: if admin(kode) || publik(kode);
+        allow create: if request.resource.data.keys().hasOnly(['nama', 'pesan', 'hadir', 'waktu'])
+                      && request.resource.data.nama is string
+                      && request.resource.data.nama.size() > 0 && request.resource.data.nama.size() <= 40
+                      && request.resource.data.pesan is string
+                      && request.resource.data.pesan.size() > 0 && request.resource.data.pesan.size() <= 300
+                      && request.resource.data.hadir in ['Hadir', 'Belum bisa hadir', 'Masih ragu']
+                      && request.resource.data.waktu is timestamp
+                      && request.resource.data.waktu > request.time - duration.value(10, 'm')
+                      && request.resource.data.waktu < request.time + duration.value(10, 'm');
+        allow delete: if admin(kode);
+      }
+
+      // Daftar tamu: hanya admin
+      match /tamu/{id} {
+        allow read, write: if admin(kode);
+      }
+
+      // Pengaturan: semua boleh baca, hanya admin boleh ubah
+      match /pengaturan/{id} {
+        allow read: if true;
+        allow write: if admin(kode);
+      }
+    }
+  }
+}
