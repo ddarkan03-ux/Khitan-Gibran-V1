@@ -5,8 +5,8 @@
    Kolom "ucapan" (ucapan dari tamu) opsional: tambahkan sendiri bila ada. */
 const DATA_UNDANGAN = {
   "kategori": "khitan",
-  "kode": "gibran-2026",
-  "siteUrl": "https://NAMAANDA.github.io/NAMA-REPO/khitan-gibran/",
+  "kode": "dar123",
+  "siteUrl": "https://ddarkan03-ux.github.io/Khitan-Gibran-V1/",
   "firebase": { "apiKey": "AIzaSyBEA92p-xAjSyvDTWT09-zsuEDyjZg2dZw", "projectId": "undangan-saya" },
   "ucapanPublik": true,
   "model": "Khitan 1 - Langit Biru",
